@@ -5,132 +5,190 @@
   <title>Admin - Panda Studios</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #eef;
       padding: 20px;
-      text-align: center;
+      background-color: #eef;
     }
-    input, button {
+    input, button, select, textarea {
       margin: 5px;
       padding: 10px;
-      border-radius: 5px;
       border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
     }
     .hidden {
       display: none;
     }
-    .project-item {
-      background: #fff;
-      margin: 10px auto;
-      padding: 10px;
-      width: 400px;
-      border-radius: 8px;
+    .block {
+      background: white;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <h1>Admin Panel - Panda Studios</h1>
-
-  <div id="loginBox">
-    <input type="password" id="password" placeholder="Enter Password">
-    <button onclick="login()">Login</button>
+  <div id="loginBlock">
+    <h2>Admin Login</h2>
+    <input type="password" id="adminPassword" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
   </div>
 
   <div id="adminPanel" class="hidden">
-    <h2>Projects</h2>
+    <div class="block">
+      <h2>Gradients</h2>
+      <input type="text" id="newGradient" placeholder="New Gradient CSS">
+      <button onclick="addGradient()">Add Gradient</button>
+      <div id="gradientList"></div>
+    </div>
 
-    <div id="adminProjects"></div>
+    <div class="block">
+      <h2>Categories</h2>
+      <input type="text" id="catName" placeholder="Category Name">
+      <textarea id="catDesc" placeholder="Category Description"></textarea>
+      <button onclick="addCategory()">Add Category</button>
+      <div id="catList"></div>
+    </div>
 
-    <h3>Create New Project</h3>
-    <input type="text" id="newProjectName" placeholder="Project Name">
-    <input type="text" id="newProjectLink" placeholder="Project Link">
-    <button onclick="addProject()">Add Project</button>
+    <div class="block">
+      <h2>Projects</h2>
+      <input type="text" id="projName" placeholder="Project Name">
+      <input type="text" id="projLink" placeholder="Project Link">
+      <select id="projCategory"></select>
+      <button onclick="addProject()">Add Project</button>
+      <div id="projList"></div>
+    </div>
 
-    <h3>Theme</h3>
-    <button onclick="changeTheme('light')">Light Theme</button>
-    <button onclick="changeTheme('dark')">Dark Theme</button>
-
-    <h3>Save Changes</h3>
-    <button onclick="saveProjects()">Save Projects</button>
+    <div class="block" style="text-align:center;">
+      <button onclick="saveAll()">Save All</button>
+    </div>
   </div>
 
 <script>
-  const correctPassword = "admin123"; // change this!
-  let projects = [
-    { name: "Cool Game", link: "https://example.com/coolgame" },
-    { name: "Art Gallery", link: "https://example.com/artgallery" }
-  ];
+  const correctPassword = "admin123"; // Set your admin password here
 
-  function login() {
-    const pw = document.getElementById('password').value;
+  let data = {
+    gradient: "linear-gradient(135deg, #a64ac9, #ff69b4)",
+    gradients: [
+      "linear-gradient(135deg, #a64ac9, #ff69b4)"
+    ],
+    categories: [],
+    projects: []
+  };
+
+  function checkPassword() {
+    const pw = document.getElementById('adminPassword').value;
     if (pw === correctPassword) {
-      document.getElementById('loginBox').classList.add('hidden');
+      document.getElementById('loginBlock').classList.add('hidden');
       document.getElementById('adminPanel').classList.remove('hidden');
-      loadAdminProjects();
+      refreshAdmin();
     } else {
       alert("Wrong password!");
     }
   }
 
-  function loadAdminProjects() {
-    const adminProjects = document.getElementById('adminProjects');
-    adminProjects.innerHTML = "";
-    projects.forEach((proj, index) => {
+  function refreshAdmin() {
+    // Gradients
+    const gradList = document.getElementById('gradientList');
+    gradList.innerHTML = '';
+    data.gradients.forEach((g, i) => {
       const div = document.createElement('div');
-      div.className = 'project-item';
-      div.innerHTML = `
-        <input type="text" value="${proj.name}" onchange="editProjectName(${index}, this.value)">
-        <input type="text" value="${proj.link}" onchange="editProjectLink(${index}, this.value)">
-        <button onclick="removeProject(${index})">Remove</button>
-      `;
-      adminProjects.appendChild(div);
+      div.innerHTML = `${g} <button onclick="removeGradient(${i})">Remove</button>`;
+      gradList.appendChild(div);
+    });
+
+    // Categories
+    const catList = document.getElementById('catList');
+    catList.innerHTML = '';
+    const projCat = document.getElementById('projCategory');
+    projCat.innerHTML = '';
+
+    data.categories.forEach((cat, i) => {
+      const div = document.createElement('div');
+      div.innerHTML = `<b>${cat.name}</b>: ${cat.description} <button onclick="removeCategory(${i})">Remove</button>`;
+      catList.appendChild(div);
+
+      const opt = document.createElement('option');
+      opt.value = cat.name;
+      opt.textContent = cat.name;
+      projCat.appendChild(opt);
+    });
+
+    // Projects
+    const projList = document.getElementById('projList');
+    projList.innerHTML = '';
+    data.projects.forEach((proj, i) => {
+      const div = document.createElement('div');
+      div.innerHTML = `${proj.name} (${proj.category}) <button onclick="removeProject(${i})">Remove</button>`;
+      projList.appendChild(div);
     });
   }
 
-  function editProjectName(index, value) {
-    projects[index].name = value;
-  }
-
-  function editProjectLink(index, value) {
-    projects[index].link = value;
-  }
-
-  function removeProject(index) {
-    projects.splice(index, 1);
-    loadAdminProjects();
-  }
-
-  function addProject() {
-    const name = document.getElementById('newProjectName').value;
-    const link = document.getElementById('newProjectLink').value;
-    if (name && link) {
-      projects.push({ name, link });
-      loadAdminProjects();
-      document.getElementById('newProjectName').value = '';
-      document.getElementById('newProjectLink').value = '';
+  function addGradient() {
+    const grad = document.getElementById('newGradient').value;
+    if (grad) {
+      data.gradients.push(grad);
+      data.gradient = grad; // auto set as active
+      document.getElementById('newGradient').value = '';
+      refreshAdmin();
     }
   }
 
-  function saveProjects() {
-    const json = JSON.stringify(projects, null, 2);
+  function removeGradient(index) {
+    data.gradients.splice(index, 1);
+    refreshAdmin();
+  }
+
+  function addCategory() {
+    const name = document.getElementById('catName').value;
+    const desc = document.getElementById('catDesc').value;
+    if (name && desc) {
+      data.categories.push({ name, description: desc });
+      document.getElementById('catName').value = '';
+      document.getElementById('catDesc').value = '';
+      refreshAdmin();
+    }
+  }
+
+  function removeCategory(index) {
+    data.categories.splice(index, 1);
+    refreshAdmin();
+  }
+
+  function addProject() {
+    const name = document.getElementById('projName').value;
+    const link = document.getElementById('projLink').value;
+    const cat = document.getElementById('projCategory').value;
+    if (name && link && cat) {
+      data.projects.push({ name, link, category: cat });
+      document.getElementById('projName').value = '';
+      document.getElementById('projLink').value = '';
+      refreshAdmin();
+    }
+  }
+
+  function removeProject(index) {
+    data.projects.splice(index, 1);
+    refreshAdmin();
+  }
+
+  function saveAll() {
+    const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = "projects.json";
+    a.download = "data.json"; // Save as data.json
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  function changeTheme(theme) {
-    if (theme === 'light') {
-      document.body.style.backgroundColor = "#eef";
-      document.body.style.color = "#000";
-    } else if (theme === 'dark') {
-      document.body.style.backgroundColor = "#222";
-      document.body.style.color = "#fff";
-    }
   }
 </script>
 
