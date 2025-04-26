@@ -2,110 +2,248 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Panda Studio's - Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Panda Studios</title>
   <style>
     body {
-      background: #111;
-      color: #fff;
-      font-family: 'Arial', sans-serif;
-      padding: 40px;
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    h1, h2 {
+
+    .login-box {
+      background: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
       text-align: center;
     }
-    .admin-section {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    input, textarea, select, button {
+
+    .login-box input {
       width: 100%;
-      margin-top: 10px;
-      margin-bottom: 20px;
       padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #333;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .login-box button {
+      padding: 10px 20px;
+      background: #4CAF50;
       color: white;
-    }
-    button {
-      background: #a855f7;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
     }
-    button:hover {
-      background: #9333ea;
+
+    .login-box button:hover {
+      background: #45a049;
+    }
+
+    .admin-content {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .category-box, .project-box {
+      padding: 20px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .category-box input, .project-box input, .project-box textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .category-box button, .project-box button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .category-box button:hover, .project-box button:hover {
+      background: #45a049;
+    }
+
+    .category-list {
+      margin-top: 20px;
+    }
+
+    .category-item {
+      padding: 10px;
+      background-color: #f1f1f1;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+
+    .project-list {
+      margin-top: 20px;
+    }
+
+    .project-item {
+      padding: 10px;
+      background-color: #f1f1f1;
+      margin-bottom: 10px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
 
-<h1>Panda Studio's - Admin Panel</h1>
-
-<div class="admin-section">
-  <h2>Change Theme</h2>
-  <input type="text" id="color1" placeholder="Color 1 (e.g. #a855f7)">
-  <input type="text" id="color2" placeholder="Color 2 (e.g. #ec4899)">
-  <button onclick="saveTheme()">Save Theme</button>
+<!-- Login Form -->
+<div id="login" class="login-box">
+  <h2>Admin Login</h2>
+  <input type="password" id="password" placeholder="Enter password">
+  <button onclick="login()">Login</button>
 </div>
 
-<div class="admin-section">
-  <h2>Add Category</h2>
-  <input type="text" id="categoryName" placeholder="Category Name">
-  <textarea id="categoryDescription" placeholder="Category Description"></textarea>
-  <button onclick="addCategory()">Add Category</button>
-</div>
+<!-- Admin Panel Content -->
+<div id="admin-content" class="admin-content">
+  <h2>Admin Panel - Panda Studios</h2>
+  <button onclick="logout()">Logout</button>
 
-<div class="admin-section">
-  <h2>Add Project</h2>
-  <input type="text" id="projectName" placeholder="Project Name">
-  <input type="text" id="projectLink" placeholder="Project Link">
-  <input type="text" id="projectCategory" placeholder="Project Category (must match category name)">
-  <button onclick="addProject()">Add Project</button>
+  <!-- Category Management -->
+  <div class="category-box">
+    <h3>Add Category</h3>
+    <input type="text" id="category-name" placeholder="Category Name">
+    <textarea id="category-description" placeholder="Category Description"></textarea>
+    <button onclick="addCategory()">Add Category</button>
+    <div class="category-list" id="category-list"></div>
+  </div>
+
+  <!-- Project Management -->
+  <div class="project-box">
+    <h3>Add Project</h3>
+    <input type="text" id="project-name" placeholder="Project Name">
+    <textarea id="project-description" placeholder="Project Description"></textarea>
+    <input type="text" id="project-link" placeholder="Project Link (URL)">
+    <select id="project-category"></select>
+    <button onclick="addProject()">Add Project</button>
+    <div class="project-list" id="project-list"></div>
+  </div>
 </div>
 
 <script>
-  function saveTheme() {
-    const color1 = document.getElementById('color1').value || '#a855f7';
-    const color2 = document.getElementById('color2').value || '#ec4899';
-    localStorage.setItem('theme', JSON.stringify({ color1, color2 }));
-    alert('Theme saved! Go refresh the main page.');
+// Admin password
+const adminPassword = 'your_secure_password_here'; // Change this password
+
+// Sample data for categories and projects (you can load this from a JSON file)
+let categories = [];
+let projects = [];
+
+// Check if already logged in
+if (localStorage.getItem('loggedIn') === 'true') {
+  showAdminContent();
+  loadCategories();
+  loadProjects();
+}
+
+// Handle login
+function login() {
+  const enteredPassword = document.getElementById('password').value;
+  
+  if (enteredPassword === adminPassword) {
+    localStorage.setItem('loggedIn', 'true');
+    showAdminContent();
+    loadCategories();
+    loadProjects();
+  } else {
+    alert('Incorrect password!');
   }
+}
 
-  function addCategory() {
-    const name = document.getElementById('categoryName').value;
-    const description = document.getElementById('categoryDescription').value;
+// Show admin content
+function showAdminContent() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('admin-content').style.display = 'block';
+}
 
-    if (!name) {
-      alert('Category needs a name!');
-      return;
-    }
+// Handle logout
+function logout() {
+  localStorage.setItem('loggedIn', 'false');
+  window.location.reload();
+}
 
-    let categories = JSON.parse(localStorage.getItem('categories')) || [];
-    categories.push({ name, description });
-    localStorage.setItem('categories', JSON.stringify(categories));
-    alert('Category added!');
+// Add Category
+function addCategory() {
+  const categoryName = document.getElementById('category-name').value;
+  const categoryDescription = document.getElementById('category-description').value;
+  if (categoryName && categoryDescription) {
+    categories.push({ name: categoryName, description: categoryDescription });
+    saveCategories();
+    loadCategories();
   }
+}
 
-  function addProject() {
-    const name = document.getElementById('projectName').value;
-    const link = document.getElementById('projectLink').value;
-    const category = document.getElementById('projectCategory').value;
+// Load Categories from stored data (simulate loading from JSON)
+function loadCategories() {
+  const categoryList = document.getElementById('category-list');
+  categoryList.innerHTML = '';
+  categories.forEach((category, index) => {
+    const categoryItem = document.createElement('div');
+    categoryItem.classList.add('category-item');
+    categoryItem.innerHTML = `${category.name}: ${category.description}`;
+    categoryList.appendChild(categoryItem);
+    
+    const option = document.createElement('option');
+    option.value = index;
+    option.textContent = category.name;
+    document.getElementById('project-category').appendChild(option);
+  });
+}
 
-    if (!name || !link || !category) {
-      alert('Fill in all fields!');
-      return;
-    }
+// Save Categories to localStorage (or JSON)
+function saveCategories() {
+  localStorage.setItem('categories', JSON.stringify(categories));
+}
 
-    let projects = JSON.parse(localStorage.getItem('projects')) || [];
-    projects.push({ name, link, category });
-    localStorage.setItem('projects', JSON.stringify(projects));
-    alert('Project added!');
+// Add Project
+function addProject() {
+  const projectName = document.getElementById('project-name').value;
+  const projectDescription = document.getElementById('project-description').value;
+  const projectLink = document.getElementById('project-link').value;
+  const projectCategory = document.getElementById('project-category').value;
+
+  if (projectName && projectDescription && projectLink && projectCategory) {
+    const selectedCategory = categories[projectCategory];
+    projects.push({ name: projectName, description: projectDescription, link: projectLink, category: selectedCategory.name });
+    saveProjects();
+    loadProjects();
   }
+}
+
+// Load Projects from stored data (simulate loading from JSON)
+function loadProjects() {
+  const projectList = document.getElementById('project-list');
+  projectList.innerHTML = '';
+  projects.forEach(project => {
+    const projectItem = document.createElement('div');
+    projectItem.classList.add('project-item');
+    projectItem.innerHTML = `<a href="${project.link}" target="_blank">${project.name}</a>: ${project.description} - Category: ${project.category}`;
+    projectList.appendChild(projectItem);
+  });
+}
+
+// Save Projects to localStorage (or JSON)
+function saveProjects() {
+  localStorage.setItem('projects', JSON.stringify(projects));
+}
 </script>
 
 </body>
