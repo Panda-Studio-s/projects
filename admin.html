@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Panda Studios</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef;
+      padding: 20px;
+      text-align: center;
+    }
+    input, button {
+      margin: 5px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .hidden {
+      display: none;
+    }
+    .project-item {
+      background: #fff;
+      margin: 10px auto;
+      padding: 10px;
+      width: 400px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Panel - Panda Studios</h1>
+
+  <div id="loginBox">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="adminPanel" class="hidden">
+    <h2>Projects</h2>
+
+    <div id="adminProjects"></div>
+
+    <h3>Create New Project</h3>
+    <input type="text" id="newProjectName" placeholder="Project Name">
+    <input type="text" id="newProjectLink" placeholder="Project Link">
+    <button onclick="addProject()">Add Project</button>
+
+    <h3>Theme</h3>
+    <button onclick="changeTheme('light')">Light Theme</button>
+    <button onclick="changeTheme('dark')">Dark Theme</button>
+
+    <h3>Save Changes</h3>
+    <button onclick="saveProjects()">Save Projects</button>
+  </div>
+
+<script>
+  const correctPassword = "admin123"; // change this!
+  let projects = [
+    { name: "Cool Game", link: "https://example.com/coolgame" },
+    { name: "Art Gallery", link: "https://example.com/artgallery" }
+  ];
+
+  function login() {
+    const pw = document.getElementById('password').value;
+    if (pw === correctPassword) {
+      document.getElementById('loginBox').classList.add('hidden');
+      document.getElementById('adminPanel').classList.remove('hidden');
+      loadAdminProjects();
+    } else {
+      alert("Wrong password!");
+    }
+  }
+
+  function loadAdminProjects() {
+    const adminProjects = document.getElementById('adminProjects');
+    adminProjects.innerHTML = "";
+    projects.forEach((proj, index) => {
+      const div = document.createElement('div');
+      div.className = 'project-item';
+      div.innerHTML = `
+        <input type="text" value="${proj.name}" onchange="editProjectName(${index}, this.value)">
+        <input type="text" value="${proj.link}" onchange="editProjectLink(${index}, this.value)">
+        <button onclick="removeProject(${index})">Remove</button>
+      `;
+      adminProjects.appendChild(div);
+    });
+  }
+
+  function editProjectName(index, value) {
+    projects[index].name = value;
+  }
+
+  function editProjectLink(index, value) {
+    projects[index].link = value;
+  }
+
+  function removeProject(index) {
+    projects.splice(index, 1);
+    loadAdminProjects();
+  }
+
+  function addProject() {
+    const name = document.getElementById('newProjectName').value;
+    const link = document.getElementById('newProjectLink').value;
+    if (name && link) {
+      projects.push({ name, link });
+      loadAdminProjects();
+      document.getElementById('newProjectName').value = '';
+      document.getElementById('newProjectLink').value = '';
+    }
+  }
+
+  function saveProjects() {
+    const json = JSON.stringify(projects, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "projects.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function changeTheme(theme) {
+    if (theme === 'light') {
+      document.body.style.backgroundColor = "#eef";
+      document.body.style.color = "#000";
+    } else if (theme === 'dark') {
+      document.body.style.backgroundColor = "#222";
+      document.body.style.color = "#fff";
+    }
+  }
+</script>
+
+</body>
+</html>

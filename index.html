@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Panda Studios</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.2em;
+    }
+    .projects {
+      margin-top: 40px;
+    }
+    .project {
+      background: #fff;
+      padding: 15px;
+      margin: 10px auto;
+      width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .project a {
+      color: #0077cc;
+      text-decoration: none;
+    }
+    footer {
+      margin-top: 50px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐼 Panda Studios</h1>
+  <p>Welcome to Panda Studios! Here are our projects:</p>
+
+  <div class="projects" id="projectsList">
+    <!-- Projects will load here -->
+  </div>
+
+  <footer>
+    <p>© 2025 Panda Studios</p>
+  </footer>
+
+<script>
+  // Example projects JSON
+  const projects = [
+    { name: "Cool Game", link: "https://example.com/coolgame" },
+    { name: "Art Gallery", link: "https://example.com/artgallery" }
+  ];
+
+  function loadProjects() {
+    const container = document.getElementById('projectsList');
+    container.innerHTML = "";
+    projects.forEach(proj => {
+      const div = document.createElement('div');
+      div.className = 'project';
+      div.innerHTML = `<h3>${proj.name}</h3><a href="${proj.link}" target="_blank">View Project</a>`;
+      container.appendChild(div);
+    });
+  }
+
+  loadProjects();
+</script>
+
+</body>
+</html>
