@@ -2,193 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Panda Studios</title>
+  <title>Panda Studio's - Admin Panel</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #eef;
+      background: #111;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      padding: 40px;
     }
-    input, button, select, textarea {
-      margin: 5px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 400px;
-    }
-    .hidden {
-      display: none;
-    }
-    .block {
-      background: white;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 600px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    h2 {
+    h1, h2 {
       text-align: center;
+    }
+    .admin-section {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+    }
+    button {
+      background: #a855f7;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #9333ea;
     }
   </style>
 </head>
 <body>
 
-  <div id="loginBlock">
-    <h2>Admin Login</h2>
-    <input type="password" id="adminPassword" placeholder="Password">
-    <button onclick="checkPassword()">Login</button>
-  </div>
+<h1>Panda Studio's - Admin Panel</h1>
 
-  <div id="adminPanel" class="hidden">
-    <div class="block">
-      <h2>Gradients</h2>
-      <input type="text" id="newGradient" placeholder="New Gradient CSS">
-      <button onclick="addGradient()">Add Gradient</button>
-      <div id="gradientList"></div>
-    </div>
+<div class="admin-section">
+  <h2>Change Theme</h2>
+  <input type="text" id="color1" placeholder="Color 1 (e.g. #a855f7)">
+  <input type="text" id="color2" placeholder="Color 2 (e.g. #ec4899)">
+  <button onclick="saveTheme()">Save Theme</button>
+</div>
 
-    <div class="block">
-      <h2>Categories</h2>
-      <input type="text" id="catName" placeholder="Category Name">
-      <textarea id="catDesc" placeholder="Category Description"></textarea>
-      <button onclick="addCategory()">Add Category</button>
-      <div id="catList"></div>
-    </div>
+<div class="admin-section">
+  <h2>Add Category</h2>
+  <input type="text" id="categoryName" placeholder="Category Name">
+  <textarea id="categoryDescription" placeholder="Category Description"></textarea>
+  <button onclick="addCategory()">Add Category</button>
+</div>
 
-    <div class="block">
-      <h2>Projects</h2>
-      <input type="text" id="projName" placeholder="Project Name">
-      <input type="text" id="projLink" placeholder="Project Link">
-      <select id="projCategory"></select>
-      <button onclick="addProject()">Add Project</button>
-      <div id="projList"></div>
-    </div>
-
-    <div class="block" style="text-align:center;">
-      <button onclick="saveAll()">Save All</button>
-    </div>
-  </div>
+<div class="admin-section">
+  <h2>Add Project</h2>
+  <input type="text" id="projectName" placeholder="Project Name">
+  <input type="text" id="projectLink" placeholder="Project Link">
+  <input type="text" id="projectCategory" placeholder="Project Category (must match category name)">
+  <button onclick="addProject()">Add Project</button>
+</div>
 
 <script>
-  const correctPassword = "admin123"; // Set your admin password here
-
-  let data = {
-    gradient: "linear-gradient(135deg, #a64ac9, #ff69b4)",
-    gradients: [
-      "linear-gradient(135deg, #a64ac9, #ff69b4)"
-    ],
-    categories: [],
-    projects: []
-  };
-
-  function checkPassword() {
-    const pw = document.getElementById('adminPassword').value;
-    if (pw === correctPassword) {
-      document.getElementById('loginBlock').classList.add('hidden');
-      document.getElementById('adminPanel').classList.remove('hidden');
-      refreshAdmin();
-    } else {
-      alert("Wrong password!");
-    }
-  }
-
-  function refreshAdmin() {
-    // Gradients
-    const gradList = document.getElementById('gradientList');
-    gradList.innerHTML = '';
-    data.gradients.forEach((g, i) => {
-      const div = document.createElement('div');
-      div.innerHTML = `${g} <button onclick="removeGradient(${i})">Remove</button>`;
-      gradList.appendChild(div);
-    });
-
-    // Categories
-    const catList = document.getElementById('catList');
-    catList.innerHTML = '';
-    const projCat = document.getElementById('projCategory');
-    projCat.innerHTML = '';
-
-    data.categories.forEach((cat, i) => {
-      const div = document.createElement('div');
-      div.innerHTML = `<b>${cat.name}</b>: ${cat.description} <button onclick="removeCategory(${i})">Remove</button>`;
-      catList.appendChild(div);
-
-      const opt = document.createElement('option');
-      opt.value = cat.name;
-      opt.textContent = cat.name;
-      projCat.appendChild(opt);
-    });
-
-    // Projects
-    const projList = document.getElementById('projList');
-    projList.innerHTML = '';
-    data.projects.forEach((proj, i) => {
-      const div = document.createElement('div');
-      div.innerHTML = `${proj.name} (${proj.category}) <button onclick="removeProject(${i})">Remove</button>`;
-      projList.appendChild(div);
-    });
-  }
-
-  function addGradient() {
-    const grad = document.getElementById('newGradient').value;
-    if (grad) {
-      data.gradients.push(grad);
-      data.gradient = grad; // auto set as active
-      document.getElementById('newGradient').value = '';
-      refreshAdmin();
-    }
-  }
-
-  function removeGradient(index) {
-    data.gradients.splice(index, 1);
-    refreshAdmin();
+  function saveTheme() {
+    const color1 = document.getElementById('color1').value || '#a855f7';
+    const color2 = document.getElementById('color2').value || '#ec4899';
+    localStorage.setItem('theme', JSON.stringify({ color1, color2 }));
+    alert('Theme saved! Go refresh the main page.');
   }
 
   function addCategory() {
-    const name = document.getElementById('catName').value;
-    const desc = document.getElementById('catDesc').value;
-    if (name && desc) {
-      data.categories.push({ name, description: desc });
-      document.getElementById('catName').value = '';
-      document.getElementById('catDesc').value = '';
-      refreshAdmin();
-    }
-  }
+    const name = document.getElementById('categoryName').value;
+    const description = document.getElementById('categoryDescription').value;
 
-  function removeCategory(index) {
-    data.categories.splice(index, 1);
-    refreshAdmin();
+    if (!name) {
+      alert('Category needs a name!');
+      return;
+    }
+
+    let categories = JSON.parse(localStorage.getItem('categories')) || [];
+    categories.push({ name, description });
+    localStorage.setItem('categories', JSON.stringify(categories));
+    alert('Category added!');
   }
 
   function addProject() {
-    const name = document.getElementById('projName').value;
-    const link = document.getElementById('projLink').value;
-    const cat = document.getElementById('projCategory').value;
-    if (name && link && cat) {
-      data.projects.push({ name, link, category: cat });
-      document.getElementById('projName').value = '';
-      document.getElementById('projLink').value = '';
-      refreshAdmin();
+    const name = document.getElementById('projectName').value;
+    const link = document.getElementById('projectLink').value;
+    const category = document.getElementById('projectCategory').value;
+
+    if (!name || !link || !category) {
+      alert('Fill in all fields!');
+      return;
     }
-  }
 
-  function removeProject(index) {
-    data.projects.splice(index, 1);
-    refreshAdmin();
-  }
-
-  function saveAll() {
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "data.json"; // Save as data.json
-    a.click();
-    URL.revokeObjectURL(url);
+    let projects = JSON.parse(localStorage.getItem('projects')) || [];
+    projects.push({ name, link, category });
+    localStorage.setItem('projects', JSON.stringify(projects));
+    alert('Project added!');
   }
 </script>
 
